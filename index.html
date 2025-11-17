@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Azeryn – The Personal Context Engine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description"
+        content="Azeryn is a personal context engine that unifies your documents, calendars, and knowledge tools into a single, intelligent index." />
+  <style>
+    :root {
+      --bg: #02030b;
+      --bg-alt: #060a1b;
+      --accent: #6f8dff;
+      --accent2: #b05bff;
+      --accent-soft: rgba(111, 141, 255, 0.2);
+      --text: #f7f7ff;
+      --muted: #a4a8c9;
+      --border: #242847;
+      --shadow-heavy: 0 30px 80px rgba(0, 0, 0, 0.9);
+      --radius-lg: 18px;
+      --radius-xl: 26px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background:
+        radial-gradient(circle at top left, #182a64 0, transparent 55%),
+        radial-gradient(circle at top right, #321b66 0, transparent 55%),
+        radial-gradient(circle at bottom, #061026 0, #02030b 55%);
+      background-color: #02030b;
+      overscroll-behavior: none;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Inter", Segoe UI, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: none;
+      background:
+        radial-gradient(circle at top left, #182a64 0, transparent 55%),
+        radial-gradient(circle at top right, #321b66 0, transparent 55%),
+        radial-gradient(circle at bottom, #061026 0, #02030b 55%);
+      background-color: #02030b;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.08;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='noStitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.85'/%3E%3C/svg%3E");
+      mix-blend-mode: soft-light;
+      z-index: -1;
+    }
+
+    .page {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    .logo-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background:
+        conic-gradient(from 210deg, #b9d4ff, #6f8dff, #b05bff, #2dd4ff, #b9d4ff);
+      box-shadow:
+        0 0 0 2px rgba(10, 14, 38, 0.9),
+        0 0 20px rgba(111, 141, 255, 0.7);
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: rgba(13, 22, 70, 0.8);
+      border: 1px solid rgba(136, 160, 255, 0.6);
+      color: #c4d1ff;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.5fr);
+      gap: 32px;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+    }
+
+    .hero-kicker {
+      font-size: 0.78rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #90a0ff;
+      margin-bottom: 10px;
+    }
+
+    .hero-title {
+      font-size: 2.9rem;
+      line-height: 1.02;
+      letter-spacing: -0.05em;
+      margin: 0 0 16px;
+    }
+
+    .hero-title span {
+      background: linear-gradient(120deg, #a9c0ff, #ffffff, #a87dff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.02rem;
+      color: var(--muted);
+      max-width: 34rem;
+      margin-bottom: 26px;
+    }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background-image: linear-gradient(135deg, #6f8dff, #b05bff);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-decoration: none;
+      box-shadow: var(--shadow-heavy);
+      transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px) translateZ(0);
+      filter: brightness(1.06);
+      box-shadow: 0 26px 70px rgba(0,0,0,0.9);
+    }
+
+    .hero-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .hero-note span {
+      color: #d4d8ff;
+    }
+
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .meta-pill {
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.09);
+      background: rgba(5, 7, 20, 0.95);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Right card */
+    .panel {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      padding: 20px 20px 18px;
+      background: linear-gradient(155deg, rgba(3,5,18,0.96), rgba(8,12,32,0.96));
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 20px 55px rgba(0,0,0,0.78);
+      isolation: isolate;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: -40% -6% auto -10%;
+      height: 62%;
+      background:
+        radial-gradient(circle at 16% 10%, rgba(111, 141, 255, 0.14), transparent 55%),
+        radial-gradient(circle at 88% 4%, rgba(176, 91, 255, 0.18), transparent 60%);
+      z-index: 0;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(120deg, rgba(255,255,255,0.05), rgba(255,255,255,0));
+      opacity: 0.6;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .pill {
+      display: inline-flex;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(4, 7, 26, 0.85);
+      font-size: 0.72rem;
+      color: #ccd2ff;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 10px;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 0.84rem;
+    }
+
+    .step {
+      padding: 9px 10px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(3, 5, 18, 0.96);
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+    }
+
+    .step-index {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.25);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #e1e4ff;
+      margin-top: 2px;
+      background: radial-gradient(circle at 30% 20%, #6b5acb, #3f2f88);
+    }
+
+    .step-title {
+      font-weight: 500;
+      font-size: 0.82rem;
+    }
+
+    .step-body {
+      color: var(--muted);
+      font-size: 0.8rem;
+    }
+
+    .status {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      align-items: center;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #6bffb0, #1fbf7a);
+      box-shadow: 0 0 10px rgba(0, 255, 157, 0.7);
+    }
+
+    .panel-footer {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(255,255,255,0.16);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    /* Below-the-fold content */
+    .grid {
+      margin-top: 56px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      padding: 20px 20px 18px;
+      background: linear-gradient(150deg, rgba(3,5,18,0.96), rgba(8,12,32,0.96));
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 18px 50px rgba(0,0,0,0.7);
+      isolation: isolate;
+    }
+
+    .card::before {
+      content: none;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(120deg, rgba(255,255,255,0.06), rgba(255,255,255,0));
+      opacity: 0.5;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .card-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .grid .card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .grid .card .card-content {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .card-scroll .card-content {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 6px;
+    }
+
+    .card-scroll .card-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .card-scroll .card-content::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.16);
+      border-radius: 999px;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .card-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(12, 16, 36, 0.8);
+      color: #d2d8ff;
+      font-size: 0.74rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .card-spark {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: radial-gradient(circle at 30% 30%, #ffffff, rgba(111, 141, 255, 0.45));
+      display: grid;
+      place-items: center;
+      font-size: 0.8rem;
+      color: #0a0c1f;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 10px 25px rgba(0,0,0,0.45);
+    }
+
+    .card h3 {
+      margin: 0;
+      font-size: 1.12rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .check-list {
+      list-style: none;
+      padding: 0;
+      margin: 6px 0 0;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .check-list li {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .check-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: radial-gradient(circle at 30% 30%, #b9c8ff, #6f8dff);
+      box-shadow: 0 0 12px rgba(111, 141, 255, 0.35);
+      flex-shrink: 0;
+    }
+
+    .card-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .meta-tag {
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: rgba(10, 12, 28, 0.9);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #cbd2ff;
+      font-size: 0.8rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 2px;
+    }
+
+    .feature {
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(6, 8, 22, 0.92);
+      color: var(--muted);
+      font-size: 0.86rem;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.45);
+    }
+
+    .feature strong {
+      display: block;
+      color: #e5e7ff;
+      font-size: 0.94rem;
+      margin-bottom: 4px;
+      letter-spacing: -0.01em;
+    }
+
+    .card-foot {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    footer {
+      margin-top: 42px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      font-size: 0.78rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    a {
+      color: #c0cdff;
+    }
+  </style>
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="page">
+    <header>
+      <div class="logo">
+        <div class="logo-mark"></div>
+        <span>AZERYN</span>
+      </div>
+      <div class="badge">Early technical preview</div>
+    </header>
+
+    <main>
+      <!-- Left: Hero -->
+      <section>
+        <div class="hero-kicker">Context-native intelligence</div>
+        <h1 class="hero-title">
+          <span>The personal</span><br />
+          context engine.
+        </h1>
+        <p class="hero-subtitle">
+          Azeryn connects to your drives, calendars, and knowledge tools,
+          builds a unified index of your world, and retrieves exactly what you
+          need — before you go looking for it.
+        </p>
+
+        <div class="hero-cta">
+          <a class="btn-primary"
+             href="mailto:hello@azeryn.com?subject=Azeryn%20Early%20Access&body=Tell%20us%20briefly%20how%20you%20manage%20information%20today%20(and%20what%20frustrates%20you).">
+            Feel free to give us feedback
+          </a>
+        </div>
+        <div class="hero-note">
+          Or email us directly at <span>hello@azeryn.com</span>.
+        </div>
+
+        <div class="hero-meta">
+          <div class="meta-pill">Built for founders, operators & students</div>
+          <div class="meta-pill">Privacy-first · Your data stays yours</div>
+        </div>
+      </section>
+
+      <!-- Right: Engine card -->
+      <aside class="panel">
+        <div class="panel-header">
+          <span></span>
+          <div class="panel-dots">
+            <span class="panel-dot"></span>
+            <span class="panel-dot"></span>
+            <span class="panel-dot"></span>
+          </div>
+        </div>
+
+        <div class="pill">How it works</div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-index">1</div>
+            <div>
+              <div class="step-title">Ingest</div>
+              <div class="step-body">
+                Securely sync Google Drive, calendars, notes and more. Azeryn
+                maintains an encrypted, up-to-date mirror of your knowledge.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-index">2</div>
+            <div>
+              <div class="step-title">Index</div>
+              <div class="step-body">
+                The engine chunks, embeds and links your data into a
+                context-aware index tuned for retrieval instead of storage.
+              </div>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-index">3</div>
+            <div>
+              <div class="step-title">Retrieve</div>
+              <div class="step-body">
+                Ask questions in natural language or let Azeryn surface the
+                right docs before meetings, deadlines and decisions.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="status">
+          <span class="status-dot"></span>
+          <span>Alpha cohort forming now · limited seats</span>
+        </div>
+
+        <div class="panel-footer">
+          If your work lives across scattered docs, notes and calendars and
+          you want a single intelligent layer over all of it, we’d love to
+          talk.
+        </div>
+      </aside>
+    </main>
+
+    <!-- Below-the-fold -->
+    <section class="grid">
+      <div class="card">
+        <div class="card-content">
+          <div class="card-top">
+            <span class="card-chip">The problem</span>
+            <div class="card-spark">!</div>
+          </div>
+          <h3>Signal scattered everywhere</h3>
+          <p>
+            Modern work is fragmented: Drive, Notion, email, Slack, calendars.
+            You know the information exists somewhere, but finding it in
+            the moment always takes too long.
+          </p>
+          <ul class="check-list">
+            <li>
+              <span class="check-icon"></span>
+              <span>Manual hunting for the same docs before every meeting.</span>
+            </li>
+            <li>
+              <span class="check-icon"></span>
+              <span>Context scattered across comments, threads and files.</span>
+            </li>
+            <li>
+              <span class="check-icon"></span>
+              <span>“I’m sure I wrote this down somewhere…” at least once a week.</span>
+            </li>
+          </ul>
+          <div class="card-meta">
+            <span class="meta-tag">Drives & notes</span>
+            <span class="meta-tag">Calendars</span>
+            <span class="meta-tag">Threads & docs</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-scroll">
+        <div class="card-content">
+          <div class="card-top">
+            <span class="card-chip">What Azeryn makes possible</span>
+            <div class="card-spark">*</div>
+          </div>
+          <h3>Make your existing knowledge usable</h3>
+          <p>
+            Azeryn’s goal is simple: make your existing information actually
+            usable. No new note app, no new format — just an intelligent layer
+            on top of the tools you already rely on.
+          </p>
+          <div class="feature-grid">
+            <div class="feature">
+              <strong>Ask</strong>
+              Answers grounded in your own data.
+            </div>
+            <div class="feature">
+              <strong>See ahead</strong>
+              The right docs and notes appear before key events and decisions.
+            </div>
+            <div class="feature">
+              <strong>Stay organized</strong>
+              Grow a personal knowledge system that stays tidy by default.
+            </div>
+          </div>
+          <ul class="check-list">
+            <li>
+              <span class="check-icon"></span>
+              <span>Privacy-first by design — your data stays yours.</span>
+            </li>
+            <li>
+              <span class="check-icon"></span>
+              <span>Built to work with what you already use today.</span>
+            </li>
+          </ul>
+          <div class="card-meta">
+            <span class="meta-tag">Context-native</span>
+            <span class="meta-tag">No new workflows</span>
+            <span class="meta-tag">Surface, don’t search</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <span>© 2025 Azeryn. All rights reserved.</span>
+      <span>Contact us: <a href="mailto:hello@azeryn.com">hello@azeryn.com</a></span>
+    </footer>
+  </div>
+</body>
+</html>
