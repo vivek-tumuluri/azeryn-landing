@@ -1,719 +1,1032 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8" />
-  <title>Azeryn – The Personal Context Engine</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description"
-        content="Azeryn is a personal context engine that unifies your documents, calendars, and knowledge tools into a single, intelligent index." />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Azeryn | Your Personal Context Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* --- CSS VARIABLES & RESET --- */
     :root {
-      --bg: #02030b;
-      --bg-alt: #060a1b;
-      --accent: #6f8dff;
-      --accent2: #b05bff;
-      --accent-soft: rgba(111, 141, 255, 0.2);
-      --text: #f7f7ff;
-      --muted: #a4a8c9;
-      --border: #242847;
-      --shadow-heavy: 0 30px 80px rgba(0, 0, 0, 0.9);
-      --radius-lg: 18px;
-      --radius-xl: 26px;
+      --bg-dark: #02030A;
+      --bg-card: #050509;
+      --accent-primary: #a855f7;
+      --accent-glow: #8b5cf6;
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(168, 85, 247, 0.4);
+      --glass-bg: rgba(10, 10, 15, 0.6);
+      --glass-blur: 16px;
+      --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
-    }
-
-    html {
-      min-height: 100%;
-      background:
-        radial-gradient(circle at top left, #182a64 0, transparent 55%),
-        radial-gradient(circle at top right, #321b66 0, transparent 55%),
-        radial-gradient(circle at bottom, #061026 0, #02030b 55%);
-      background-color: #02030b;
-      overscroll-behavior: none;
+      font-family: 'Inter', sans-serif;
     }
 
     body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-        "Inter", Segoe UI, sans-serif;
-      min-height: 100vh;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
       overflow-x: hidden;
-      overflow-y: auto;
-      overscroll-behavior: none;
-      background:
-        radial-gradient(circle at top left, #182a64 0, transparent 55%),
-        radial-gradient(circle at top right, #321b66 0, transparent 55%),
-        radial-gradient(circle at bottom, #061026 0, #02030b 55%);
-      background-color: #02030b;
-      color: var(--text);
       line-height: 1.6;
-    }
-
-    .noise {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.08;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='noStitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.85'/%3E%3C/svg%3E");
-      mix-blend-mode: soft-light;
-      z-index: -1;
-    }
-
-    .page {
-      max-width: 1080px;
-      margin: 0 auto;
-      padding: 32px 20px 64px;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 40px;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 600;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      font-size: 0.85rem;
-    }
-
-    .logo-mark {
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      background:
-        conic-gradient(from 210deg, #b9d4ff, #6f8dff, #b05bff, #2dd4ff, #b9d4ff);
-      box-shadow:
-        0 0 0 2px rgba(10, 14, 38, 0.9),
-        0 0 20px rgba(111, 141, 255, 0.7);
-    }
-
-    .badge {
-      font-size: 0.7rem;
-      padding: 5px 11px;
-      border-radius: 999px;
-      background: rgba(13, 22, 70, 0.8);
-      border: 1px solid rgba(136, 160, 255, 0.6);
-      color: #c4d1ff;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-    }
-
-    main {
-      display: grid;
-      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1.5fr);
-      gap: 32px;
-      align-items: center;
-    }
-
-    @media (max-width: 900px) {
-      main {
-        grid-template-columns: 1fr;
-      }
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-    }
-
-    .hero-kicker {
-      font-size: 0.78rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: #90a0ff;
-      margin-bottom: 10px;
-    }
-
-    .hero-title {
-      font-size: 2.9rem;
-      line-height: 1.02;
-      letter-spacing: -0.05em;
-      margin: 0 0 16px;
-    }
-
-    .hero-title span {
-      background: linear-gradient(120deg, #a9c0ff, #ffffff, #a87dff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .hero-subtitle {
-      font-size: 1.02rem;
-      color: var(--muted);
-      max-width: 34rem;
-      margin-bottom: 26px;
-    }
-
-    .hero-cta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 14px;
-    }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 11px 20px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background-image: linear-gradient(135deg, #6f8dff, #b05bff);
-      color: #fff;
-      font-size: 0.95rem;
-      font-weight: 500;
-      text-decoration: none;
-      box-shadow: var(--shadow-heavy);
-      transition: transform 0.14s ease, box-shadow 0.14s ease, filter 0.14s ease;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px) translateZ(0);
-      filter: brightness(1.06);
-      box-shadow: 0 26px 70px rgba(0,0,0,0.9);
-    }
-
-    .hero-note {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .hero-note span {
-      color: #d4d8ff;
-    }
-
-    .hero-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 18px;
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .meta-pill {
-      padding: 5px 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.09);
-      background: rgba(5, 7, 20, 0.95);
-      backdrop-filter: blur(8px);
-    }
-
-    /* Right card */
-    .panel {
-      position: relative;
-      overflow: hidden;
-      border-radius: var(--radius-xl);
-      padding: 20px 20px 18px;
-      background: linear-gradient(155deg, rgba(3,5,18,0.96), rgba(8,12,32,0.96));
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 20px 55px rgba(0,0,0,0.78);
-      isolation: isolate;
-    }
-
-    .panel::before {
-      content: "";
-      position: absolute;
-      inset: -40% -6% auto -10%;
-      height: 62%;
-      background:
-        radial-gradient(circle at 16% 10%, rgba(111, 141, 255, 0.14), transparent 55%),
-        radial-gradient(circle at 88% 4%, rgba(176, 91, 255, 0.18), transparent 60%);
-      z-index: 0;
-    }
-
-    .panel::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(120deg, rgba(255,255,255,0.05), rgba(255,255,255,0));
-      opacity: 0.6;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .pill {
-      display: inline-flex;
-      padding: 4px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(4, 7, 26, 0.85);
-      font-size: 0.72rem;
-      color: #ccd2ff;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 10px;
-    }
-
-    .steps {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 12px;
-      font-size: 0.84rem;
-    }
-
-    .step {
-      padding: 9px 10px;
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(3, 5, 18, 0.96);
-      display: flex;
-      gap: 9px;
-      align-items: flex-start;
-    }
-
-    .step-index {
-      width: 18px;
-      height: 18px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.25);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      color: #e1e4ff;
-      margin-top: 2px;
-      background: radial-gradient(circle at 30% 20%, #6b5acb, #3f2f88);
-    }
-
-    .step-title {
-      font-weight: 500;
-      font-size: 0.82rem;
-    }
-
-    .step-body {
-      color: var(--muted);
-      font-size: 0.8rem;
-    }
-
-    .status {
-      display: flex;
-      gap: 8px;
-      margin-top: 6px;
-      font-size: 0.75rem;
-      color: var(--muted);
-      align-items: center;
-    }
-
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 30% 30%, #6bffb0, #1fbf7a);
-      box-shadow: 0 0 10px rgba(0, 255, 157, 0.7);
-    }
-
-    .panel-footer {
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px dashed rgba(255,255,255,0.16);
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    /* Below-the-fold content */
-    .grid {
-      margin-top: 56px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 20px;
-    }
-
-    .card {
-      position: relative;
-      overflow: hidden;
-      border-radius: var(--radius-xl);
-      padding: 20px 20px 18px;
-      background: linear-gradient(150deg, rgba(3,5,18,0.96), rgba(8,12,32,0.96));
-      border: 1px solid rgba(255,255,255,0.06);
-      box-shadow: 0 18px 50px rgba(0,0,0,0.7);
-      isolation: isolate;
-    }
-
-    .card::before {
-      content: none;
-    }
-
-    .card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      background: linear-gradient(120deg, rgba(255,255,255,0.06), rgba(255,255,255,0));
-      opacity: 0.5;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .card-content {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .grid .card {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-
-    .grid .card .card-content {
-      flex: 1;
-      min-height: 0;
-    }
-
-    .card-scroll .card-content {
-      max-height: 300px;
-      overflow-y: auto;
-      padding-right: 6px;
-    }
-
-    .card-scroll .card-content::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .card-scroll .card-content::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.16);
-      border-radius: 999px;
-    }
-
-    .card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .card-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(12, 16, 36, 0.8);
-      color: #d2d8ff;
-      font-size: 0.74rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .card-spark {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      background: radial-gradient(circle at 30% 30%, #ffffff, rgba(111, 141, 255, 0.45));
-      display: grid;
-      place-items: center;
-      font-size: 0.8rem;
-      color: #0a0c1f;
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.08), 0 10px 25px rgba(0,0,0,0.45);
-    }
-
-    .card h3 {
-      margin: 0;
-      font-size: 1.12rem;
-      letter-spacing: -0.01em;
-    }
-
-    .card p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .check-list {
-      list-style: none;
-      padding: 0;
-      margin: 6px 0 0;
-      display: flex;
-      flex-direction: column;
-      gap: 9px;
-    }
-
-    .check-list li {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    .check-icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: radial-gradient(circle at 30% 30%, #b9c8ff, #6f8dff);
-      box-shadow: 0 0 12px rgba(111, 141, 255, 0.35);
-      flex-shrink: 0;
-    }
-
-    .card-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
-    }
-
-    .meta-tag {
-      padding: 6px 10px;
-      border-radius: 12px;
-      background: rgba(10, 12, 28, 0.9);
-      border: 1px solid rgba(255,255,255,0.08);
-      color: #cbd2ff;
-      font-size: 0.8rem;
-    }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      margin-top: 2px;
-    }
-
-    .feature {
-      padding: 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.08);
-      background: rgba(6, 8, 22, 0.92);
-      color: var(--muted);
-      font-size: 0.86rem;
-      box-shadow: 0 10px 22px rgba(0,0,0,0.45);
-    }
-
-    .feature strong {
-      display: block;
-      color: #e5e7ff;
-      font-size: 0.94rem;
-      margin-bottom: 4px;
-      letter-spacing: -0.01em;
-    }
-
-    .card-foot {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 0.82rem;
-      line-height: 1.5;
-    }
-
-    footer {
-      margin-top: 42px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255,255,255,0.07);
-      font-size: 0.78rem;
-      color: var(--muted);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: space-between;
+      -webkit-font-smoothing: antialiased;
     }
 
     a {
-      color: #c0cdff;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    /* --- BACKGROUND ANIMATION (AURORA) --- */
+    .aurora-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: -1;
+      background: radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.15), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.1), transparent 25%);
+      filter: blur(60px);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    /* --- NAVBAR (Supermemory Inspired) --- */
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 1.2rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      background: transparent;
+      backdrop-filter: blur(0px);
+      border-bottom: 1px solid transparent;
+      transition: var(--transition-smooth);
+    }
+
+    .navbar.scrolled {
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 1rem 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1.5rem;
+      letter-spacing: -0.03em;
+      background: linear-gradient(to right, #fff, #cbd5e1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    .nav-link {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--text-main);
+      text-shadow: 0 0 10px var(--accent-primary);
+    }
+
+    /* --- HERO SECTION (Cursor Inspired) --- */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5%;
+      position: relative;
+      padding-top: 80px;
+    }
+
+    .hero-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      /* Balanced 50/50 split */
+      gap: 4rem;
+      max-width: 1250px;
+      width: 100%;
+      align-items: center;
+    }
+
+    /* Typewriter & Header Styles */
+    .hero-text h1 {
+      font-size: 3.5rem;
+      line-height: 1.15;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.04em;
+      background: linear-gradient(180deg, #fff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      min-height: 3.8rem;
+      display: inline-block;
+    }
+
+    .typewriter-cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1em;
+      background-color: var(--accent-primary);
+      margin-left: 5px;
+      vertical-align: text-bottom;
+      animation: blink 1s step-end infinite;
+      -webkit-text-fill-color: initial;
+    }
+
+    @keyframes blink {
+
+      from,
+      to {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .hero-text p {
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      margin-bottom: 2.5rem;
+      max-width: 90%;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      padding: 0.8rem 1.8rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-glow));
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: white;
+      border: 1px solid var(--border-accent);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+      background: rgba(168, 85, 247, 0.05);
+    }
+
+    /* --- VISUALS (Further Scaled Down) --- */
+    .hero-visual {
+      position: relative;
+      height: 420px;
+      /* Reduced from 500px */
+      width: 100%;
+      perspective: 1200px;
+    }
+
+    .glass-card {
+      background: rgba(20, 20, 25, 0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 14px;
+      position: absolute;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.7), 0 0 30px rgba(168, 85, 247, 0.1);
+      padding: 1.5rem;
+      transition: transform 0.5s ease;
+    }
+
+    .ui-main {
+      width: 100%;
+      height: 320px;
+      /* Reduced from 380px */
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-top: 1px solid rgba(168, 85, 247, 0.5);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 2;
+      padding: 1.8rem;
+      /* Reduced padding */
+    }
+
+    .ui-float-1 {
+      width: 200px;
+      /* Reduced from 240px */
+      height: 60px;
+      /* Reduced from 70px */
+      top: 18%;
+      right: 0px;
+      animation: float 6s ease-in-out infinite;
+      border-left: 3px solid var(--accent-primary);
+      display: flex;
+      align-items: center;
+      padding-left: 15px;
+      font-size: 0.85rem;
+      color: #e2e8f0;
+      font-weight: 500;
+    }
+
+    .ui-float-2 {
+      width: 230px;
+      /* Reduced from 260px */
+      height: 120px;
+      /* Reduced from 140px */
+      bottom: -5px;
+      left: -20px;
+      z-index: 3;
+      animation: float 7s ease-in-out infinite reverse;
+      border-top: 2px solid var(--accent-primary);
+      background: rgba(15, 15, 20, 0.9);
+      padding: 20px;
+    }
+
+    /* UI Mockup Content */
+    .ui-line {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+
+    .ui-line.short {
+      width: 60%;
+    }
+
+    .ui-line.purple {
+      background: rgba(168, 85, 247, 0.25);
+      width: 40%;
+    }
+
+    .ui-search-bar {
+      height: 44px;
+      /* Reduced from 48px */
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      color: #e2e8f0;
+      font-size: 1rem;
+      /* Slightly smaller text */
+      font-weight: 400;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-15px);
+      }
+    }
+
+    /* --- SECTIONS COMMON --- */
+    section {
+      padding: 6rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-header h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* --- PRODUCT SECTION --- */
+    #product {
+      position: relative;
+    }
+
+    .product-preview {
+      width: 100%;
+      background: linear-gradient(180deg, rgba(20, 20, 25, 0.7) 0%, rgba(5, 5, 9, 1) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 0 100px rgba(168, 85, 247, 0.05);
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .preview-header {
+      height: 40px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #333;
+    }
+
+    .preview-content {
+      padding: 3rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .feature-point h3 {
+      font-size: 1.2rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .feature-point h3::before {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 6px;
+      background: var(--accent-primary);
+      box-shadow: 0 0 8px var(--accent-primary);
+      border-radius: 50%;
+    }
+
+    .feature-point p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 2rem;
+      padding-left: 16px;
+    }
+
+    /* --- HOW IT WORKS (Grid) --- */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+    }
+
+    .step-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-subtle);
+      padding: 2rem 1.5rem;
+      border-radius: 12px;
+      transition: var(--transition-smooth);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--border-accent);
+      background: rgba(255, 255, 255, 0.04);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+    }
+
+    .step-number {
+      font-size: 3rem;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.05);
+      position: absolute;
+      top: 0;
+      right: 10px;
+      line-height: 1;
+    }
+
+    .step-icon {
+      color: var(--accent-primary);
+      margin-bottom: 1.2rem;
+      font-size: 1.5rem;
+    }
+
+    .step-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .step-card p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* --- FEATURES GRID --- */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: rgba(10, 10, 15, 0.4);
+      backdrop-filter: blur(10px);
+      padding: 2.5rem;
+      border-radius: 12px;
+      border: 1px solid var(--border-subtle);
+      transition: var(--transition-smooth);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+
+    .feature-card:hover {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+    }
+
+    .feature-card h4 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    .feature-card p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    /* --- WAITLIST OVERLAY --- */
+    #waitlist-overlay {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 5, 12, 0.95);
+      backdrop-filter: blur(6px);
+      display: none;
+      flex-direction: column;
+      z-index: 9999;
+      color: #f5f5ff;
+    }
+
+    .waitlist-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 24px;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .waitlist-logo {
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .waitlist-close-btn {
+      cursor: pointer;
+      font-size: 20px;
+      line-height: 1;
+      padding: 4px 10px;
+      border-radius: 8px;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .waitlist-close-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      transform: scale(1.05);
+    }
+
+    .waitlist-content {
+      margin: 0 auto;
+      max-width: 650px;
+      width: 100%;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .waitlist-content h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .waitlist-content p {
+      opacity: 0.9;
+      margin-bottom: 18px;
+    }
+
+    .waitlist-iframe-wrapper {
+      width: 100%;
+      height: 65vh;
+      margin-top: 20px;
+    }
+
+    .waitlist-iframe-wrapper iframe {
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+      border: none;
+    }
+
+    .waitlist-fallback a {
+      color: var(--accent-primary);
+      text-decoration: underline;
+    }
+
+    /* --- FOOTER --- */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 4rem 2rem;
+      background: #010103;
+      margin-top: 4rem;
+    }
+
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-brand {
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #fff;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent-primary);
+    }
+
+    .copyright {
+      color: #52525b;
+      font-size: 0.8rem;
+      margin-top: 2rem;
+      text-align: center;
+      display: block;
+    }
+
+    /* --- SCROLL REVEAL ANIMATION CLASSES --- */
+    .reveal {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.8s ease-out;
+    }
+
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 1100px) {
+      .hero-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 4rem;
+      }
+
+      .hero-text p {
+        margin: 0 auto 2.5rem auto;
+      }
+
+      .btn-group {
+        justify-content: center;
+      }
+
+      .hero-visual {
+        height: 350px;
+        max-width: 500px;
+        margin: 0 auto;
+      }
+
+      .ui-main {
+        height: 280px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .steps-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .hero-visual {
+        display: none;
+      }
+
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-text h1 {
+        font-size: 2.2rem;
+      }
+
+      .navbar {
+        padding: 1rem;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .footer-content {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
     }
   </style>
 </head>
+
 <body>
-  <div class="noise"></div>
-  <div class="page">
-    <header>
-      <div class="logo">
-        <div class="logo-mark"></div>
-        <span>AZERYN</span>
-      </div>
-      <div class="badge">Early technical preview</div>
-    </header>
 
-    <main>
-      <!-- Left: Hero -->
-      <section>
-        <div class="hero-kicker">Context-native intelligence</div>
-        <h1 class="hero-title">
-          <span>The personal</span><br />
-          context engine.
+  <div class="aurora-bg"></div>
+
+  <nav class="navbar" id="navbar">
+    <a href="#" class="brand">Azeryn</a>
+    <div class="nav-links">
+      <a href="#product" class="nav-link">Product</a>
+      <a href="#how-it-works" class="nav-link">How it works</a>
+      <a href="#features" class="nav-link">Features</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-container">
+      <div class="hero-text reveal">
+        <h1>
+          <span id="typewriter-text"></span><span class="typewriter-cursor"></span>
         </h1>
-        <p class="hero-subtitle">
-          Azeryn connects to your drives, calendars, and knowledge tools,
-          builds a unified index of your world, and retrieves exactly what you
-          need — before you go looking for it.
-        </p>
-
-        <div class="hero-cta">
-          <a class="btn-primary"
-             href="mailto:hello@azeryn.com?subject=Azeryn%20Early%20Access&body=Tell%20us%20briefly%20how%20you%20manage%20information%20today%20(and%20what%20frustrates%20you).">
-            Feel free to give us feedback
-          </a>
-        </div>
-        <div class="hero-note">
-          Or email us directly at <span>hello@azeryn.com</span>.
-        </div>
-
-        <div class="hero-meta">
-          <div class="meta-pill">Built for founders, operators & students</div>
-          <div class="meta-pill">Privacy-first · Your data stays yours</div>
-        </div>
-      </section>
-
-      <!-- Right: Engine card -->
-      <aside class="panel">
-        <div class="panel-header">
-          <span></span>
-          <div class="panel-dots">
-            <span class="panel-dot"></span>
-            <span class="panel-dot"></span>
-            <span class="panel-dot"></span>
-          </div>
-        </div>
-
-        <div class="pill">How it works</div>
-
-        <div class="steps">
-          <div class="step">
-            <div class="step-index">1</div>
-            <div>
-              <div class="step-title">Ingest</div>
-              <div class="step-body">
-                Securely sync Google Drive, calendars, notes and more. Azeryn
-                maintains an encrypted, up-to-date mirror of your knowledge.
-              </div>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-index">2</div>
-            <div>
-              <div class="step-title">Index</div>
-              <div class="step-body">
-                The engine chunks, embeds and links your data into a
-                context-aware index tuned for retrieval instead of storage.
-              </div>
-            </div>
-          </div>
-          <div class="step">
-            <div class="step-index">3</div>
-            <div>
-              <div class="step-title">Retrieve</div>
-              <div class="step-body">
-                Ask questions in natural language or let Azeryn surface the
-                right docs before meetings, deadlines and decisions.
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="status">
-          <span class="status-dot"></span>
-          <span>Alpha cohort forming now · limited seats</span>
-        </div>
-
-        <div class="panel-footer">
-          If your work lives across scattered docs, notes and calendars and
-          you want a single intelligent layer over all of it, we’d love to
-          talk.
-        </div>
-      </aside>
-    </main>
-
-    <!-- Below-the-fold -->
-    <section class="grid">
-      <div class="card">
-        <div class="card-content">
-          <div class="card-top">
-            <span class="card-chip">The problem</span>
-            <div class="card-spark">!</div>
-          </div>
-          <h3>Signal scattered everywhere</h3>
-          <p>
-            Modern work is fragmented: Drive, Notion, email, Slack, calendars.
-            You know the information exists somewhere, but finding it in
-            the moment always takes too long.
-          </p>
-          <ul class="check-list">
-            <li>
-              <span class="check-icon"></span>
-              <span>Manual hunting for the same docs before every meeting.</span>
-            </li>
-            <li>
-              <span class="check-icon"></span>
-              <span>Context scattered across comments, threads and files.</span>
-            </li>
-            <li>
-              <span class="check-icon"></span>
-              <span>“I’m sure I wrote this down somewhere…” at least once a week.</span>
-            </li>
-          </ul>
-          <div class="card-meta">
-            <span class="meta-tag">Drives & notes</span>
-            <span class="meta-tag">Calendars</span>
-            <span class="meta-tag">Threads & docs</span>
-          </div>
+        <p>Azeryn unifies your Google Drive, Calendar, and personal data into a single intelligent context layer that
+          surfaces what you need the moment you need it.</p>
+        <div class="btn-group">
+          <a href="#" id="join-waitlist-btn" class="btn btn-primary">Join Waitlist</a>
+          <a href="mailto:hello@azeryn.com" class="btn btn-secondary">Contact Us</a>
         </div>
       </div>
 
-      <div class="card card-scroll">
-        <div class="card-content">
-          <div class="card-top">
-            <span class="card-chip">What Azeryn makes possible</span>
-            <div class="card-spark">*</div>
+      <div class="hero-visual reveal">
+        <div class="glass-card ui-main">
+          <div class="ui-search-bar">Ask Azeryn... <span
+              style="margin-left:auto; opacity:0.6; font-size:0.8rem; border:1px solid #555; padding:2px 6px; border-radius:4px;">⌘K</span>
           </div>
-          <h3>Make your existing knowledge usable</h3>
-          <p>
-            Azeryn’s goal is simple: make your existing information actually
-            usable. No new note app, no new format — just an intelligent layer
-            on top of the tools you already rely on.
-          </p>
-          <div class="feature-grid">
-            <div class="feature">
-              <strong>Ask</strong>
-              Answers grounded in your own data.
-            </div>
-            <div class="feature">
-              <strong>See ahead</strong>
-              The right docs and notes appear before key events and decisions.
-            </div>
-            <div class="feature">
-              <strong>Stay organized</strong>
-              Grow a personal knowledge system that stays tidy by default.
-            </div>
+          <div class="ui-line purple"></div>
+          <div class="ui-line short"></div>
+          <div class="ui-line"></div>
+          <div class="ui-line short"></div>
+
+          <div
+            style="margin-top:auto; font-size:0.95rem; color:#94a3b8; display:flex; justify-content:space-between; align-items:center;">
+            <span>Context: <span style="color:#fff;">Meeting with Eng Team</span></span>
+            <span
+              style="color:var(--accent-primary); font-weight:600; font-size:0.85rem; display:flex; align-items:center; gap:6px;">
+              <span
+                style="width:6px; height:6px; background:var(--accent-primary); border-radius:50%; box-shadow:0 0 10px var(--accent-primary);"></span>
+              Live
+            </span>
           </div>
-          <ul class="check-list">
-            <li>
-              <span class="check-icon"></span>
-              <span>Privacy-first by design — your data stays yours.</span>
-            </li>
-            <li>
-              <span class="check-icon"></span>
-              <span>Built to work with what you already use today.</span>
-            </li>
-          </ul>
-          <div class="card-meta">
-            <span class="meta-tag">Context-native</span>
-            <span class="meta-tag">No new workflows</span>
-            <span class="meta-tag">Surface, don’t search</span>
+        </div>
+
+        <div class="glass-card ui-float-1">
+          <span style="margin-right:10px; font-size:1rem;">📄</span> relevant_doc_v2.pdf
+        </div>
+
+        <div class="glass-card ui-float-2" style="display:flex; flex-direction:column; justify-content:center;">
+          <div style="font-size:0.75rem; color:#94a3b8; letter-spacing:0.05em; font-weight:600;">UPCOMING</div>
+          <div style="font-size:1.1rem; color:#fff; font-weight:700; margin-top:5px;">Q4 Roadmap</div>
+          <div
+            style="font-size:0.85rem; color:var(--accent-primary); margin-top:8px; display:flex; align-items:center; gap:8px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path
+                d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+            </svg>
+            Loading context...
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </header>
 
-    <footer>
-      <span>© 2025 Azeryn. All rights reserved.</span>
-      <span>Contact us: <a href="mailto:hello@azeryn.com">hello@azeryn.com</a></span>
-    </footer>
+  <section id="product" class="reveal">
+    <div class="section-header">
+      <h2>Unified Intelligence</h2>
+      <p>Built for speed. Designed for context.</p>
+    </div>
+
+    <div class="product-preview">
+      <div class="preview-header">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="preview-content">
+        <div>
+          <div class="feature-point">
+            <h3>Deep Integration</h3>
+            <p>Seamlessly connects to Google Drive and Calendar. We don't just store files; we understand the
+              relationships between them.</p>
+          </div>
+          <div class="feature-point">
+            <h3>pgvector RAG Architecture</h3>
+            <p>Documents are parsed, chunked, and embedded into a high-performance vector database for semantic
+              retrieval.</p>
+          </div>
+          <div class="feature-point">
+            <h3>Proactive Surfacing</h3>
+            <p>Azeryn checks your calendar and opens the relevant briefs, specs, and emails 5 minutes before your
+              meeting starts.</p>
+          </div>
+        </div>
+        <div
+          style="font-family:'Courier New', monospace; font-size:0.8rem; color: #a5b4fc; opacity: 0.8; line-height: 1.8;">
+          > Initializing context_engine...<br>
+          > Connecting to G_Drive_OAuth... <span style="color:#4ade80">OK</span><br>
+          > Parsing 'Project_Titan_Specs.pdf'<br>
+          > Generating embeddings (text-embedding-3-small)<br>
+          > Indexing 1,402 vectors...<br>
+          > Listening for Calendar events...<br>
+          <br>
+          <span style="color:#fff">_ Ready. Waiting for query.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="how-it-works">
+    <div class="section-header reveal">
+      <h2>How It Works</h2>
+    </div>
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <span class="step-number">1</span>
+        <div class="step-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </div>
+        <h3>Connect Accounts</h3>
+        <p>Secure Google OAuth integration grants read-only access to your specific knowledge base.</p>
+      </div>
+      <div class="step-card reveal" style="transition-delay: 100ms;">
+        <span class="step-number">2</span>
+        <div class="step-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+            </path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <h3>Index Knowledge</h3>
+        <p>We parse, chunk, and embed your data, creating a semantic map of your digital life.</p>
+      </div>
+      <div class="step-card reveal" style="transition-delay: 200ms;">
+        <span class="step-number">3</span>
+        <div class="step-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+          </svg>
+        </div>
+        <h3>Context Activates</h3>
+        <p>Our engine monitors your schedule, pulling relevant files automatically before you ask.</p>
+      </div>
+      <div class="step-card reveal" style="transition-delay: 300ms;">
+        <span class="step-number">4</span>
+        <div class="step-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <h3>Command All</h3>
+        <p>Use the universal keyboard shortcut to search across every connected app instantly.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="features">
+    <div class="section-header reveal">
+      <h2>System Capabilities</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card reveal">
+        <h4>Google Drive Ingestion</h4>
+        <p>Full support for Docs, Sheets, Slides, and PDFs. Live sync ensures your context is never stale.</p>
+      </div>
+      <div class="feature-card reveal">
+        <h4>Calendar Intelligence</h4>
+        <p>Event-aware logic that prepares you for meetings by summarizing attendees and past notes.</p>
+      </div>
+      <div class="feature-card reveal">
+        <h4>Grounded RAG</h4>
+        <p>Answers include citations linking directly back to the source file. No hallucinations.</p>
+      </div>
+      <div class="feature-card reveal">
+        <h4>Command Palette</h4>
+        <p>Accessible anywhere via global hotkey. A floating window for instant recall.</p>
+      </div>
+      <div class="feature-card reveal">
+        <h4>Secure Architecture</h4>
+        <p>Built on FastAPI and Postgres. Your data is encrypted at rest and in transit.</p>
+      </div>
+      <div class="feature-card reveal">
+        <h4>Future Expansion</h4>
+        <p>Connectors for Notion, Slack, and Linear coming in Q2 2025.</p>
+      </div>
+    </div>
+  </section>
+
+  <div id="waitlist-overlay">
+    <div class="waitlist-top-bar">
+      <div class="waitlist-logo">Azeryn</div>
+      <div class="waitlist-close-btn" id="close-waitlist-btn">×</div>
+    </div>
+    <div class="waitlist-content">
+      <h1>Join the Azeryn Waitlist</h1>
+      <p>Your unified personal context layer for everything you work on.</p>
+      <div class="waitlist-iframe-wrapper">
+        <!-- Replace src and fallback link with your live form URL -->
+        <iframe id="waitlist-iframe"
+          src="https://tally.so/r/81NkAz" loading="lazy" frameborder="0" allowfullscreen></iframe>
+      </div>
+      <p class="waitlist-fallback">If the form doesn't load, <a
+          href="https://tally.so/r/81NkAz" target="_blank">click here</a>.</p>
+    </div>
   </div>
+
+  <footer>
+    <div class="footer-content">
+      <div class="footer-brand">Azeryn</div>
+      <div class="footer-links">
+        <a href="#product">Product</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#features">Features</a>
+      </div>
+    </div>
+    <span class="copyright">© 2025 Azeryn. All rights reserved.</span>
+  </footer>
+
+  <script>
+    // --- NAVBAR SCROLL EFFECT ---
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+
+    // --- SCROLL ANIMATIONS ---
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: "0px 0px -50px 0px"
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('active');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.reveal').forEach(el => {
+      observer.observe(el);
+    });
+
+    // --- TYPEWRITER EFFECT ---
+    const typeWriterElement = document.getElementById('typewriter-text');
+    const text1 = "Your knowledge.";
+    const text2 = "Available instantly.";
+    let i = 0;
+    let isSecondLine = false;
+
+    function typeWriter() {
+      if (!isSecondLine) {
+        if (i < text1.length) {
+          typeWriterElement.innerHTML += text1.charAt(i);
+          i++;
+          setTimeout(typeWriter, 60); // Typing speed line 1
+        } else {
+          typeWriterElement.innerHTML += "<br>";
+          isSecondLine = true;
+          i = 0;
+          setTimeout(typeWriter, 400); // Pause between lines
+        }
+      } else {
+        if (i < text2.length) {
+          typeWriterElement.innerHTML += text2.charAt(i);
+          i++;
+          setTimeout(typeWriter, 60); // Typing speed line 2
+        }
+      }
+    }
+
+    // Start typing slightly after load
+    window.addEventListener('load', () => {
+      setTimeout(typeWriter, 500);
+    });
+
+    // --- WAITLIST OVERLAY HANDLERS ---
+    const waitlistOverlay = document.getElementById('waitlist-overlay');
+    const joinWaitlistBtn = document.getElementById('join-waitlist-btn');
+    const closeWaitlistBtn = document.getElementById('close-waitlist-btn');
+
+    if (joinWaitlistBtn && waitlistOverlay) {
+      joinWaitlistBtn.addEventListener('click', (evt) => {
+        evt.preventDefault();
+        waitlistOverlay.style.display = 'flex';
+      });
+    }
+
+    if (closeWaitlistBtn && waitlistOverlay) {
+      closeWaitlistBtn.addEventListener('click', () => {
+        waitlistOverlay.style.display = 'none';
+      });
+    }
+
+    document.addEventListener('keydown', (evt) => {
+      if (evt.key === 'Escape' && waitlistOverlay && waitlistOverlay.style.display === 'flex') {
+        waitlistOverlay.style.display = 'none';
+      }
+    });
+  </script>
 </body>
+
 </html>
